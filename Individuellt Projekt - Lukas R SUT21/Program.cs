@@ -7,13 +7,57 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
         static void Main(string[] args)
         {
             Menu MainMenu = new Menu();
-            MainMenu.PrintMenu("Lukas");
+            Account[] AllAccounts = new Account[5];
+            Account Lukas = new Account ("LuksRos", "BadPassword123", "Lukas", "Rose");
+            Account David = new Account("Daviddd", "Lösenord123", "David", "Larsson");
+            AllAccounts[0] = Lukas;
+            for (int i = 1; i < 5; i++)
+            {
+                AllAccounts[i] = David;
+            }
+
+            bool loggedIn = MainMenu.Login(AllAccounts);
+
             Console.ReadLine();
         }
     }
-    class Menu
+    public class Menu
     {
         string[] menuChoices = { "1. Se dina konton och saldo", "2. Överföring mellan konton", "3. Ta ut pengar", "4. Logga ut" };
+
+        public static void loginPrint()
+        {
+            Console.Clear();
+            string[] loginScreen = { "Vänligen fyll i användarnamn och lösenord.", " ", "Användarnamn: ", "Lösenord: " };
+            for (int j = 0; j < loginScreen.Length; j++)
+            {
+                Console.WriteLine(loginScreen[j]);
+            }
+        }
+        
+
+        public bool Login (Account[] AccountList)
+        {
+            
+            for (int i = 0; i < 3; i++)
+            {
+                loginPrint();
+                Console.SetCursorPosition(14, 2);
+                string usernameInput = Console.ReadLine();
+                Console.SetCursorPosition(10, 3);
+                string passInput = Console.ReadLine();
+
+                for (int k = 0; k < AccountList.Length; k++)
+                {
+                    if ((AccountList[k].userName == usernameInput) && (AccountList[k].password == passInput))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+            
+        }
 
         public void PrintMenu(string tempUserName)
         {
@@ -57,8 +101,21 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             }             
             }
     }
-    class User
+    public class Account
     {
-
+        public string userName;
+        public string password;
+        public string name;
+        public string surName;
+        public decimal[] accounts = new decimal[2];
+        public string[] accountNames = new string[2];
+        
+        public Account(string userNameInput, string passwordInput, string nameInput, string surNameInput)
+        {
+            userName = userNameInput;
+            password = passwordInput;
+            name = nameInput;
+            surName = surNameInput;
+        }
     }
 }
