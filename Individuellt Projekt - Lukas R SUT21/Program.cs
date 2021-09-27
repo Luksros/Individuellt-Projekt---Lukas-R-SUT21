@@ -6,7 +6,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
     {
         static void Main(string[] args)
         {
-            Menu MainMenu = new Menu();
+            //Setup
             Account[] AllAccounts = new Account[5];
             Account Lukas = new Account ("LuksRos", "BadPassword123", "Lukas", "Rose");
             Account David = new Account("Daviddd", "Lösenord123", "David", "Larsson");
@@ -16,15 +16,32 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 AllAccounts[i] = David;
             }
 
-            bool loggedIn = MainMenu.Login(AllAccounts);
+
+            //Login
+            int accountIndex = 10;
+            int loginTries = 0;
+            bool loggedIn = false;
+            while (!loggedIn && loginTries < 3)
+            {
+                loggedIn = Menu.Login(AllAccounts, ref accountIndex, ref loginTries);
+                if (loggedIn)
+                {
+                    Menu.MainMenu(AllAccounts[accountIndex], ref loggedIn);
+                }
+            }
+            if (loginTries > 2)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("Du har misslyckats att logga in för många gånger. Programmet är nu spärrat.");
+            }
+
+            
 
             Console.ReadLine();
         }
     }
-    public class Menu
+    public static class Menu
     {
-        string[] menuChoices = { "1. Se dina konton och saldo", "2. Överföring mellan konton", "3. Ta ut pengar", "4. Logga ut" };
-
         public static void loginPrint()
         {
             Console.Clear();
@@ -36,7 +53,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
         }
         
 
-        public bool Login (Account[] AccountList)
+        public static bool Login (Account[] AccountList, ref int indexTarget, ref int loginCounter)
         {
             
             for (int i = 0; i < 3; i++)
@@ -51,26 +68,34 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 {
                     if ((AccountList[k].userName == usernameInput) && (AccountList[k].password == passInput))
                     {
+                        Console.Clear();
+                        indexTarget = k;
+                        loginCounter = 0;
                         return true;
                     }
                 }
+
+                loginCounter++;
             }
             return false;
             
         }
 
-        public void PrintMenu(string tempUserName)
-        {
-            Console.WriteLine("Välkommen, " + tempUserName);
+        public static void PrintMenu(string tempUserName, string tempUserSurName)
+        {           
+            Console.WriteLine("Välkommen, {0} {1}", tempUserName, tempUserSurName);
             Console.WriteLine();
+
+            string[] menuChoices = { "1. Se dina konton och saldo", "2. Överföring mellan konton", "3. Ta ut pengar", "4. Logga ut" };
             for (int i = 0; i < menuChoices.Length; i++)
             {
                 Console.WriteLine(menuChoices[i]);
             }
         }
 
-        public static void MenuSelection()
+        public static void MainMenu(Account LoggedInUser, ref bool tempLoggedIn)
         {
+            PrintMenu(LoggedInUser.name, LoggedInUser.surName);
             int selector = 0;
             while (!int.TryParse(Console.ReadLine(), out selector))
             {
@@ -95,7 +120,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                     }
                 case 4:
                     {
-                        //return to login screen
+                        tempLoggedIn = false;
                         break;
                     }
             }             
