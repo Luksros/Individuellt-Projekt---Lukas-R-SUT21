@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Individuellt_Projekt___Lukas_R_SUT21
 {
@@ -8,7 +9,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
         {
             //Setup
             Account[] AllAccounts = new Account[5];
-            Account Lukas = new Account ("LuksRos", "BadPassword123", "Lukas", "Rose");
+            Account Lukas = new Account("LuksRos", "BadPassword123", "Lukas", "Rose");
             Account David = new Account("Daviddd", "Lösenord123", "David", "Larsson");
             AllAccounts[0] = Lukas;
             for (int i = 1; i < 5; i++)
@@ -24,7 +25,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             while (!loggedIn && loginTries < 3)
             {
                 loggedIn = Menu.Login(AllAccounts, ref accountIndex, ref loginTries);
-                if (loggedIn)
+                while (loggedIn)
                 {
                     Menu.MainMenu(AllAccounts[accountIndex], ref loggedIn);
                 }
@@ -32,30 +33,61 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             if (loginTries > 2)
             {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine();
                 Console.WriteLine("Du har misslyckats att logga in för många gånger. Programmet är nu spärrat.");
             }
-
-            
-
             Console.ReadLine();
         }
     }
     public static class Menu
     {
-        public static void loginPrint()
+        public static void MainMenu(Account LoggedInUser, ref bool tempLoggedIn)
         {
-            Console.Clear();
-            string[] loginScreen = { "Vänligen fyll i användarnamn och lösenord.", " ", "Användarnamn: ", "Lösenord: " };
-            for (int j = 0; j < loginScreen.Length; j++)
+            PrintMenu(LoggedInUser.name, LoggedInUser.surName);
+            int selector = 0;
+            while (!int.TryParse(Console.ReadLine(), out selector))
             {
-                Console.WriteLine(loginScreen[j]);
+
+            }
+            switch (selector)
+            {
+                case 1:
+                    {
+                        checkBalance(LoggedInUser);
+                        break;
+                    }
+                case 2:
+                    {
+                        transferFunds(LoggedInUser);
+                        break;
+                    }
+                case 3:
+                    {
+                        withdrawFunds(LoggedInUser);
+                        break;
+                    }
+                case 4:
+                    {
+                        tempLoggedIn = false;
+                        break;
+                    }
             }
         }
-        
 
-        public static bool Login (Account[] AccountList, ref int indexTarget, ref int loginCounter)
+        public static void PrintMenu(string tempUserName, string tempUserSurName)
         {
-            
+            Console.Clear();
+            Console.WriteLine("Välkommen, {0} {1}", tempUserName, tempUserSurName);
+            Console.WriteLine();
+
+            string[] menuChoices = { "1. Se dina konton och saldo", "2. Överföring mellan konton", "3. Ta ut pengar", "4. Logga ut" };
+            for (int i = 0; i < menuChoices.Length; i++)
+            {
+                Console.WriteLine(menuChoices[i]);
+            }
+        }
+        public static bool Login(Account[] AccountList, ref int indexTarget, ref int loginCounter)
+        {
             for (int i = 0; i < 3; i++)
             {
                 loginPrint();
@@ -68,63 +100,114 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 {
                     if ((AccountList[k].userName == usernameInput) && (AccountList[k].password == passInput))
                     {
-                        Console.Clear();
                         indexTarget = k;
                         loginCounter = 0;
                         return true;
                     }
                 }
-
                 loginCounter++;
             }
             return false;
-            
         }
 
-        public static void PrintMenu(string tempUserName, string tempUserSurName)
-        {           
-            Console.WriteLine("Välkommen, {0} {1}", tempUserName, tempUserSurName);
+        public static void loginPrint()
+        {
+            Console.Clear();
+            string[] loginScreen = { "Vänligen fyll i användarnamn och lösenord.", " ", "Användarnamn: ", "Lösenord: " };
+            for (int j = 0; j < loginScreen.Length; j++)
+            {
+                Console.WriteLine(loginScreen[j]);
+            }
+        }
+
+        public static void checkBalance(Account loggedInUser)
+        {
+            //string[] strings = { "Kontoöversikt: ", " ", loggedInUser.accountNames[0], " ", Decimal.ToString(loggedInUser.accounts[0]),   };
+            Console.Clear();
+            Console.WriteLine("KONTOÖVERSIKT");
+            Console.WriteLine();
+            Console.Write(loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
+            Console.WriteLine();
+            Console.Write(loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Tryck Enter för att återvända.");
+            Console.ReadLine();
+        }
+
+        public static void transferFunds(Account loggedInUser)
+        {
+            Console.Clear();
+            Console.WriteLine("KONTON");
+            Console.WriteLine();
+            Console.WriteLine("Vilket konto vill du föra över pengar ifrån?");
+            Console.WriteLine();
+            Console.Write("[1] " + loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
+            Console.WriteLine();
+            Console.Write("[2] " + loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
+            Console.WriteLine();
+            int select = 0;
+            while ((!int.TryParse(Console.ReadLine(), out select)) || ((select != 1) && (select != 2)))
+            {
+                Menu.ClearLine();
+            }
+
+
+            Console.Clear();
+            Console.WriteLine("Föra över från " + loggedInUser.accountNames[select - 1] + " till vilket konto?");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.Write("[1] " + loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
+            Console.WriteLine();
+            Console.Write("[2] " + loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
             Console.WriteLine();
 
-            string[] menuChoices = { "1. Se dina konton och saldo", "2. Överföring mellan konton", "3. Ta ut pengar", "4. Logga ut" };
-            for (int i = 0; i < menuChoices.Length; i++)
+            int select2 = 0;
+            while ((!int.TryParse(Console.ReadLine(), out select2)) || ((select2 != 1) && (select2 != 2)) || (select2 == select))
             {
-                Console.WriteLine(menuChoices[i]);
+                Menu.ClearLine();
             }
+            Console.WriteLine("Hur mycket vill du föra över?");
+            decimal transferAmt = 0.00m;
+            while (!Decimal.TryParse(Console.ReadLine(), out transferAmt) || (transferAmt > loggedInUser.accounts[select-1]))
+            {
+                Menu.ClearLine();
+            }
+            loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
+            loggedInUser.accounts[select2 - 1] = loggedInUser.accounts[select2 - 1] + transferAmt;
+            checkBalance(loggedInUser);
         }
-
-        public static void MainMenu(Account LoggedInUser, ref bool tempLoggedIn)
+        public static void withdrawFunds(Account loggedInUser)
         {
-            PrintMenu(LoggedInUser.name, LoggedInUser.surName);
-            int selector = 0;
-            while (!int.TryParse(Console.ReadLine(), out selector))
+            Console.Clear();
+            Console.WriteLine("KONTON");
+            Console.WriteLine();
+            Console.WriteLine("Vilket konto vill du ta ut pengar ifrån?");
+            Console.WriteLine();
+            Console.Write("[1] " + loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
+            Console.WriteLine();
+            Console.Write("[2] " + loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
+            Console.WriteLine();
+            int select = 0;
+            while ((!int.TryParse(Console.ReadLine(), out select)) || ((select != 1) && (select != 2)))
             {
-               
+                Menu.ClearLine();
             }
-            switch (selector)
+            Console.WriteLine("Hur mycket vill du ta ut?");
+            decimal transferAmt = 0.00m;
+            while (!Decimal.TryParse(Console.ReadLine(), out transferAmt) || (transferAmt > loggedInUser.accounts[select - 1]))
             {
-                case 1:
-                    {
-                        //Method for account overview
-                        break;
-                    }
-                case 2:
-                    {
-                        //Method for transferring funds between accounts
-                        break;
-                    }
-                case 3:
-                    {
-                        //Method for money withdrawals
-                        break;
-                    }
-                case 4:
-                    {
-                        tempLoggedIn = false;
-                        break;
-                    }
-            }             
+                Menu.ClearLine();
             }
+            loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
+            checkBalance(loggedInUser);
+        }
+        public static void ClearLine()
+        {
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.Write(new String(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+        }
     }
     public class Account
     {
@@ -132,9 +215,9 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
         public string password;
         public string name;
         public string surName;
-        public decimal[] accounts = new decimal[2];
-        public string[] accountNames = new string[2];
-        
+        public List<decimal> accounts = new List<decimal> { 10000.00m, 100000.00m };
+        public List<string> accountNames = new List<string> { "Lönekonto", "Sparkonto" };
+
         public Account(string userNameInput, string passwordInput, string nameInput, string surNameInput)
         {
             userName = userNameInput;
