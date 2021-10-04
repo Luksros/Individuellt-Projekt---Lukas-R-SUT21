@@ -8,15 +8,11 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
         static void Main(string[] args)
         {
             //Setup
-            Account[] AllAccounts = new Account[5];
-            Account Lukas = new Account("LuksRos", "BadPassword123", "Lukas", "Rose");
-            Account David = new Account("Daviddd", "Lösenord123", "David", "Larsson");
-            AllAccounts[0] = Lukas;
-            for (int i = 1; i < 5; i++)
-            {
-                AllAccounts[i] = David;
-            }
-
+            Account[] AllAccounts = { new Account ("LuRo", "BadPassword123", "Lukas", "Rose"),
+                                      new Account("ErNo", "Norell95", "Erik", "Norell"), 
+                                      new Account("DaLa", "Lösenord123", "David", "Larsson"),
+                                      new Account("ViGu", "Bergfalk9", "Viktor", "Gunnarsson"),
+                                      new Account("ToLa", "H4ck3rm4n", "Tobias", "Landén") };
 
             //Login
             int accountIndex = 10;
@@ -54,19 +50,32 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 case 1:
                     {
                         checkBalance(LoggedInUser);
+                        Console.WriteLine("Tryck Enter för att återvända.");
+                        Console.ReadLine();
                         break;
                     }
                 case 2:
                     {
                         transferFunds(LoggedInUser);
+                        Console.WriteLine("Tryck Enter för att återvända.");
+                        Console.ReadLine();
                         break;
                     }
                 case 3:
                     {
                         withdrawFunds(LoggedInUser);
+                        Console.WriteLine("Tryck Enter för att återvända");
+                        Console.ReadLine();
                         break;
                     }
                 case 4:
+                    {
+                        addFunds(LoggedInUser);
+                        Console.WriteLine("Tryck Enter för att återvända");
+                        Console.ReadLine();
+                        break;
+                    }
+                case 5:
                     {
                         tempLoggedIn = false;
                         break;
@@ -80,7 +89,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             Console.WriteLine("Välkommen, {0} {1}", tempUserName, tempUserSurName);
             Console.WriteLine();
 
-            string[] menuChoices = { "1. Se dina konton och saldo", "2. Överföring mellan konton", "3. Ta ut pengar", "4. Logga ut" };
+            string[] menuChoices = { "[1] Se dina konton och saldo", "[2] Överföring mellan konton", "[3] Ta ut pengar", "[4] Sätta in pengar", "[5] Logga ut" };
             for (int i = 0; i < menuChoices.Length; i++)
             {
                 Console.WriteLine(menuChoices[i]);
@@ -120,76 +129,56 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             }
         }
 
-        public static void checkBalance(Account loggedInUser)
+        public static void checkBalance(Account loggedInUser, string print = "KONTOÖVERSIKT")
         {
-            //string[] strings = { "Kontoöversikt: ", " ", loggedInUser.accountNames[0], " ", Decimal.ToString(loggedInUser.accounts[0]),   };
             Console.Clear();
-            Console.WriteLine("KONTOÖVERSIKT");
+            Console.WriteLine(print);
             Console.WriteLine();
-            Console.Write(loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
+            for (int i = 0; i < loggedInUser.accountNames.Count; i++)
+            {
+                Console.WriteLine("["+(i+1)+"]" + loggedInUser.accountNames[i] + ": " + loggedInUser.accounts[i]);
+            }
             Console.WriteLine();
-            Console.Write(loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Tryck Enter för att återvända.");
-            Console.ReadLine();
         }
 
         public static void transferFunds(Account loggedInUser)
         {
             Console.Clear();
-            Console.WriteLine("KONTON");
-            Console.WriteLine();
-            Console.WriteLine("Vilket konto vill du föra över pengar ifrån?");
-            Console.WriteLine();
-            Console.Write("[1] " + loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
-            Console.WriteLine();
-            Console.Write("[2] " + loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
-            Console.WriteLine();
+            checkBalance(loggedInUser, "KONTON");
+            Console.WriteLine("Vilket konto vill du föra över pengar ifrån?");          
             int select = 0;
-            while ((!int.TryParse(Console.ReadLine(), out select)) || ((select != 1) && (select != 2)))
+            while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 0) || (select > loggedInUser.accounts.Count))
             {
                 Menu.ClearLine();
             }
 
-
-            Console.Clear();
-            Console.WriteLine("Föra över från " + loggedInUser.accountNames[select - 1] + " till vilket konto?");
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.Write("[1] " + loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
-            Console.WriteLine();
-            Console.Write("[2] " + loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
-            Console.WriteLine();
+            checkBalance(loggedInUser, ("Föra över från " + loggedInUser.accountNames[select-1] + " till vilket konto?"));
 
             int select2 = 0;
-            while ((!int.TryParse(Console.ReadLine(), out select2)) || ((select2 != 1) && (select2 != 2)) || (select2 == select))
+            while ((!int.TryParse(Console.ReadLine(), out select2)) || (select2 < 0) || (select2 > loggedInUser.accounts.Count) || (select2 == select))
             {
                 Menu.ClearLine();
             }
+
             Console.WriteLine("Hur mycket vill du föra över?");
             decimal transferAmt = 0.00m;
             while (!Decimal.TryParse(Console.ReadLine(), out transferAmt) || (transferAmt > loggedInUser.accounts[select-1]))
             {
                 Menu.ClearLine();
             }
+
             loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
             loggedInUser.accounts[select2 - 1] = loggedInUser.accounts[select2 - 1] + transferAmt;
             checkBalance(loggedInUser);
+            Console.WriteLine();
         }
         public static void withdrawFunds(Account loggedInUser)
         {
             Console.Clear();
-            Console.WriteLine("KONTON");
-            Console.WriteLine();
+            checkBalance(loggedInUser, "KONTON");
             Console.WriteLine("Vilket konto vill du ta ut pengar ifrån?");
-            Console.WriteLine();
-            Console.Write("[1] " + loggedInUser.accountNames[0] + ": " + loggedInUser.accounts[0]);
-            Console.WriteLine();
-            Console.Write("[2] " + loggedInUser.accountNames[1] + ": " + loggedInUser.accounts[1]);
-            Console.WriteLine();
             int select = 0;
-            while ((!int.TryParse(Console.ReadLine(), out select)) || ((select != 1) && (select != 2)))
+            while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 0) || (select > loggedInUser.accounts.Count))
             {
                 Menu.ClearLine();
             }
@@ -200,6 +189,25 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 Menu.ClearLine();
             }
             loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
+            checkBalance(loggedInUser);
+        }
+        public static void addFunds(Account loggedInUser)
+        {
+            Console.Clear();
+            checkBalance(loggedInUser, "KONTON");
+            Console.WriteLine("Vilket konto vill du sätta in pengar på?");
+            int select = 0;
+            while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 0) || (select > loggedInUser.accounts.Count))
+            {
+                Menu.ClearLine();
+            }
+            Console.WriteLine("Hur mycket vill du sätta in?");
+            decimal transferAmt = 0.00m;
+            while (!Decimal.TryParse(Console.ReadLine(), out transferAmt) || (transferAmt > loggedInUser.accounts[select - 1]))
+            {
+                Menu.ClearLine();
+            }
+            loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] + transferAmt;
             checkBalance(loggedInUser);
         }
         public static void ClearLine()
