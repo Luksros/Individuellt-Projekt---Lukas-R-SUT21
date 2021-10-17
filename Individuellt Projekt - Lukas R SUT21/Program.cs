@@ -152,7 +152,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 //This while is the same as the one above, but also makes sure that the same account isn't selected twice
                 while ((!int.TryParse(Console.ReadLine(), out select2)) || (select2 < 1) || (select2 > loggedInUser.accounts.Count) || (select2 == select))
                 {
-                    Menu.ClearLine();
+                    Menu.ClearLine();   
                     WriteRed("Ogiltig input. ", 2);
                     Console.Write("Välj konto att flytta pengar till: ");
                 }
@@ -206,9 +206,21 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 Console.Write("Skriv in hur mycket du vill ta ut: ");
             }
 
-            loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
-            CheckBalance(loggedInUser);
-            WriteGreen((transferAmt + " Kr togs ut från " + loggedInUser.accountNames[select - 1]), 1);
+            Console.Clear();
+            Console.WriteLine("Vänligen bekräfta uttag av beloppet {0} Kr med ditt lösenord: ", transferAmt);
+            string tempPassword = Console.ReadLine();
+
+            //If users input matches password field stored in their User-object, the money is deducted from the account
+            if (tempPassword == loggedInUser.password)
+            {
+                loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
+                CheckBalance(loggedInUser);
+                WriteGreen((transferAmt + " Kr togs ut från " + loggedInUser.accountNames[select - 1]), 1);
+            }
+            else
+            {
+                WriteRed("Fel lösenord. ", 1);
+            }       
             Return();
         }
 
