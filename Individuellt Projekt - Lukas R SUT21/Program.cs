@@ -15,22 +15,24 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                                 new User("ToLa", "H4ck3rm4n", "Tobias", "Landén") };
 
             //Login
-            int accountIndex = 10;
-            int loginTries = 0;
+            int accountIndex = 10; //This int is set to 10 because I couldn´t leave it unassigned, and I needed a number that wouldn´t correspond with an index in User array if login fails.
+            int loginTries = 0; //Will keep track of how many times a user has tried to log in. 
             bool loggedIn = false;
-            while (!loggedIn && loginTries < 3)
+            while (!loggedIn && loginTries < 3) //As long as user has failed less than three times, they get to try again.
             {
-                loggedIn = Menu.Login(AllUsers, ref accountIndex, ref loginTries);
-                while (loggedIn)
+                loggedIn = Menu.Login(AllUsers, ref accountIndex, ref loginTries); //Menu.Login lets the user write username and password, and returns true or false depending on the login attempt being successful or not.
+                                                                                   //I am using ref parameters so I can change the values of the arguments and use those values outside the scope of the method.
+                while (loggedIn) //This loop will keep typing out the main menu, and only triggers when "loggedIn" is true.
                 {
                     Menu.MainMenu(AllUsers[accountIndex], ref loggedIn);
                 }
             }
-            if (loginTries > 2)
+            if (loginTries > 2)//Once the user has failed three times, they can´t do anything else with the program
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine();
-                Console.WriteLine("Du har misslyckats att logga in för många gånger. Programmet är nu spärrat.");
+                Menu.WriteRed("Du har misslyckats att logga in för många gånger. Programmet är nu spärrat.", 1);
+                Console.WriteLine("Tryck Enter för att avsluta.");
+                Console.Beep(247, 300);
+                Console.Beep(174, 300);
             }
             Console.ReadLine();
         }
@@ -40,7 +42,7 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
         public static void MainMenu(User LoggedInUser, ref bool tempLoggedIn)
         {
             PrintMenu(LoggedInUser.name, LoggedInUser.surName);
-            int selector = 0;
+            int selector;
             while (!int.TryParse(Console.ReadLine(), out selector))
             {
 
@@ -49,115 +51,71 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             {
                 case 1:
                     {
-                        checkBalance(LoggedInUser);
-                        Console.WriteLine("Tryck Enter för att återvända.");
-                        Console.ReadLine();
+                        CheckBalance(LoggedInUser);
+                        Return();
                         break;
                     }
                 case 2:
                     {
-                        manageAccounts(LoggedInUser);
+                        ManageAccounts(LoggedInUser);
                         break;
                     }
                 case 3:
                     {
-                        transferFunds(LoggedInUser);
-                        Console.WriteLine("Tryck Enter för att återvända.");
-                        Console.ReadLine();
+                        TransferFunds(LoggedInUser);
                         break;
                     }
                 case 4:
                     {
-                        withdrawFunds(LoggedInUser);
-                        Console.WriteLine("Tryck Enter för att återvända");
-                        Console.ReadLine();
+                        WithdrawFunds(LoggedInUser);
                         break;
                     }
                 case 5:
                     {
-                        addFunds(LoggedInUser);
-                        Console.WriteLine("Tryck Enter för att återvända");
-                        Console.ReadLine();
+                        AddFunds(LoggedInUser);
                         break;
                     }
                 case 6:
                     {
-                        logOut();
+                        LogOutBeep();
                         tempLoggedIn = false;
                         break;
                     }
             }
         }
 
-        public static void PrintMenu(string tempUserName, string tempUserSurName)
-        {
-            Console.Clear();
-            Console.WriteLine("Välkommen, {0} {1}", tempUserName, tempUserSurName);
-            Console.WriteLine();
-
-            string[] menuChoices = { "[1] Se dina konton och saldo", "[2] Hantera konton","[3] Överföring mellan konton", "[4] Ta ut pengar", "[5] Sätta in pengar", "[6] Logga ut" };
-            for (int i = 0; i < menuChoices.Length; i++)
-            {
-                Console.WriteLine(menuChoices[i]);
-            }
-        }
-        public static bool Login(User[] AccountList, ref int indexTarget, ref int loginCounter)
+        //LOGIN - Checks users input against the username and password fields of all the users, and returns true if a match is made
+        public static bool Login(User[] AccountList, ref int indexTarget, ref int loginTryCounter)
         {
             for (int i = 0; i < 3; i++)
             {
-                loginPrint();
-                Console.SetCursorPosition(14, 2);
+                LoginPrint();
+
+                //User inputs their username and password
+                Console.SetCursorPosition(14, 1);
                 string usernameInput = Console.ReadLine();
-                Console.SetCursorPosition(10, 3);
+                Console.SetCursorPosition(10, 2);
                 string passInput = Console.ReadLine();
 
+                //If matches are found for both the username and password fields on the same index of the user array, true is returned and the number of tries is reset
                 for (int k = 0; k < AccountList.Length; k++)
                 {
                     if ((AccountList[k].userName == usernameInput) && (AccountList[k].password == passInput))
                     {
                         indexTarget = k;
-                        loginCounter = 0;
+                        loginTryCounter = 0;
                         Console.Clear();
-                        Console.Write("Loggar in ");
-                        Console.Beep(261, 150);
-                        Console.Write(". ");                      
-                        Console.Beep(329, 150);
-                        Console.Write(". ");
-                        Console.Beep(392, 150);
-                        Console.Write(". ");
-                        Console.Beep(522, 250);
+                        LogInBeep();
                         return true;
                     }
                 }
-                loginCounter++;
-            }
-            Console.Beep(247, 300);
-            Console.Beep(174, 300);
+                loginTryCounter++;
+            }          
             return false;          
         }
-        public static void logOut()
-        {
-            Console.Clear();
-            Console.Write("Loggar ut ");
-            Console.Beep(522, 250);           
-            Console.Write(". ");
-            Console.Beep(392, 150);
-            Console.Write(". ");
-            Console.Beep(329, 150);           
-            Console.Write(". ");
-            Console.Beep(261, 150);
-        }
-        public static void loginPrint()
-        {
-            Console.Clear();
-            string[] loginScreen = { "Vänligen fyll i användarnamn och lösenord.", " ", "Användarnamn: ", "Lösenord: " };
-            for (int j = 0; j < loginScreen.Length; j++)
-            {
-                Console.WriteLine(loginScreen[j]);
-            }
-        }
 
-        public static void checkBalance(User loggedInUser, string print = "KONTOÖVERSIKT")
+        //CHECKBALANCE - Simply displays all of the users accounts and their available funds
+        public static void CheckBalance(User loggedInUser, string print = "KONTOÖVERSIKT")
         {
             Console.Clear();
             Console.WriteLine(print);
@@ -169,98 +127,125 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             Console.WriteLine();
         }
 
-        public static void transferFunds(User loggedInUser)
+        //TRANSFERFUNDS - Used to move funds between the different accounts that a user has available
+        public static void TransferFunds(User loggedInUser)
         {
             Console.Clear();
-            checkBalance(loggedInUser, "KONTON");
-            Console.WriteLine("Vilket konto vill du föra över pengar ifrån?");          
-            int select = 0;
-            while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 1) || (select > loggedInUser.accounts.Count))
+            if (loggedInUser.accounts.Count > 1)
             {
-                Menu.ClearLine();
+                CheckBalance(loggedInUser, "KONTON");
+                Console.Write("Välj konto att flytta pengar från: ");
+                int select;
+
+                //This while-loop simultaneously protects against exceptions, and also makes sure that the input can only match the available account numbers
+                while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 1) || (select > loggedInUser.accounts.Count))
+                {
+                    Menu.ClearLine();
+                    WriteRed("Ogiltig input. ", 2);
+                    Console.Write("Välj konto att flytta pengar från: ");
+                }
+
+                CheckBalance(loggedInUser, ("Föra över från " + loggedInUser.accountNames[select - 1] + " till vilket konto?"));
+
+                int select2;
+
+                //This while is the same as the one above, but also makes sure that the same account isn't selected twice
+                while ((!int.TryParse(Console.ReadLine(), out select2)) || (select2 < 1) || (select2 > loggedInUser.accounts.Count) || (select2 == select))
+                {
+                    Menu.ClearLine();
+                    WriteRed("Ogiltig input. ", 2);
+                    Console.Write("Välj konto att flytta pengar till: ");
+                }
+
+                Console.WriteLine("Välj summa att föra över: ");
+                decimal transferAmt;
+                while (!Decimal.TryParse(Console.ReadLine(), out transferAmt) || (transferAmt > loggedInUser.accounts[select - 1]))
+                {
+                    Menu.ClearLine();
+                    WriteRed("Ogiltig input. ", 2);
+                    Console.Write("Välj summa att föra över: ");
+                }
+
+                //-1 is used in the brackets because the indexes start on 0, and not 1, but it wouldn't make sense for the users accounts to start on the number 0
+                loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
+                loggedInUser.accounts[select2 - 1] = loggedInUser.accounts[select2 - 1] + transferAmt;
+                CheckBalance(loggedInUser);
+                WriteGreen((transferAmt + " Kr fördes över från " + loggedInUser.accountNames[select - 1] + " till " + loggedInUser.accountNames[select2 - 1]), 1);
+                Return();
             }
-
-            checkBalance(loggedInUser, ("Föra över från " + loggedInUser.accountNames[select-1] + " till vilket konto?"));
-
-            int select2 = 0;
-            while ((!int.TryParse(Console.ReadLine(), out select2)) || (select2 < 1) || (select2 > loggedInUser.accounts.Count) || (select2 == select))
+            else
             {
-                Menu.ClearLine();
+                WriteRed("Du har bara ett konto. Överföring inte möjlig.", 1);
+                Return();
             }
-
-            Console.WriteLine("Hur mycket vill du föra över?");
-            decimal transferAmt = 0.00m;
-            while (!Decimal.TryParse(Console.ReadLine(), out transferAmt) || (transferAmt > loggedInUser.accounts[select-1]))
-            {
-                Menu.ClearLine();
-            }
-
-            loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
-            loggedInUser.accounts[select2 - 1] = loggedInUser.accounts[select2 - 1] + transferAmt;
-            checkBalance(loggedInUser);
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(transferAmt + " Kr fördes över från " + loggedInUser.accountNames[select - 1] + " till " + loggedInUser.accountNames[select2 - 1]);
-            Console.ResetColor();
+            
         }
-        public static void withdrawFunds(User loggedInUser)
+
+        //WithdrawFunds - Does what it's called, really. Pretty much uses the same logic as WithdrawFunds.
+        public static void WithdrawFunds(User loggedInUser)
         {
             Console.Clear();
-            checkBalance(loggedInUser, "KONTON");
-            Console.WriteLine("Vilket konto vill du ta ut pengar ifrån?");
-            int select = 0;
+            CheckBalance(loggedInUser, "KONTON");
+
+            Console.WriteLine("Välj konto att ta ut pengar ifrån: ");
+            int select;
             while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 1) || (select > loggedInUser.accounts.Count))
             {
                 Menu.ClearLine();
+                WriteRed("Ogiltig input. ", 2);
+                Console.Write("Välj konto att ta ut pengar ifrån: ");
             }
+
             ClearLine();
             Console.Write("Skriv in hur mycket du vill ta ut: ");
-            decimal transferAmt = 0.00m;
+            decimal transferAmt;
             while (!Decimal.TryParse(Console.ReadLine(), out transferAmt) || (transferAmt > loggedInUser.accounts[select - 1]))
             {
                 Menu.ClearLine();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Ogiltig input. ");
-                Console.ResetColor();
+                WriteRed("Ogiltig input. ", 2);
                 Console.Write("Skriv in hur mycket du vill ta ut: ");
             }
+
             loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] - transferAmt;
-            checkBalance(loggedInUser);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(transferAmt + " Kr togs ut från " + loggedInUser.accountNames[select -1]);
-            Console.ResetColor();
+            CheckBalance(loggedInUser);
+            WriteGreen((transferAmt + " Kr togs ut från " + loggedInUser.accountNames[select - 1]), 1);
+            Return();
         }
-        public static void addFunds(User loggedInUser)
+
+        //ADDFUNDS - Like WithdrawFunds, but adds money instead.
+        public static void AddFunds(User loggedInUser)
         {
             Console.Clear();
-            checkBalance(loggedInUser, "KONTON");
-            Console.WriteLine("Vilket konto vill du sätta in pengar på?");
-            int select = 0;
+            CheckBalance(loggedInUser, "KONTON");
+            Console.WriteLine("Välj konto att sätta in pengar på: ");
+            int select;
             while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 1) || (select > loggedInUser.accounts.Count))
             {
                 Menu.ClearLine();
             }
             ClearLine();
             Console.WriteLine("Hur mycket vill du sätta in?");
-            decimal transferAmt = 0.00m;
+            decimal transferAmt;
             while (!Decimal.TryParse(Console.ReadLine(), out transferAmt))
             {
                 Menu.ClearLine();
             }
             loggedInUser.accounts[select - 1] = loggedInUser.accounts[select - 1] + transferAmt;
-            checkBalance(loggedInUser);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(transferAmt + " Kr sattes in på " + loggedInUser.accountNames[select - 1]);
-            Console.ResetColor();
+            CheckBalance(loggedInUser);
+            WriteGreen((transferAmt + " Kr sattes in på " + loggedInUser.accountNames[select - 1]), 1);
+            Return();
         }
 
-        public static void manageAccounts (User loggedInUser)
+
+        //MANAGEACCOUNTS - Allows the user to create and remove accounts, the latter of which has a few safety measures
+        public static void ManageAccounts (User loggedInUser)
         {
             Console.Clear();
             Console.WriteLine("Vill du lägga till eller ta bort ett konto?");
             Console.WriteLine();
             Console.WriteLine("[1] Lägga till");
             Console.WriteLine("[2] Ta bort");
-            int select = 0;
+            int select;
             while ((!int.TryParse(Console.ReadLine(), out select)) || ((select != 1) && (select != 2)))
             {
                 Menu.ClearLine();
@@ -272,39 +257,105 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
                 loggedInUser.accounts.Add(0.00m);
                 loggedInUser.accountNames.Add(Console.ReadLine());
                 Console.Clear();
-                Console.WriteLine("Kontot " + loggedInUser.accountNames[loggedInUser.accountNames.Count - 1] + " har skapats.");
+                WriteGreen("Kontot " + loggedInUser.accountNames[loggedInUser.accountNames.Count - 1] + " har skapats.", 1);
             }
             else
             {
                 if (loggedInUser.accounts.Count < 2)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Ogiltigt val. Du måste ha minst ett konto.");
-                    Console.ResetColor();
+                    Console.Clear();
+                    WriteRed("Ogiltigt val. Du måste ha minst ett konto.", 1);
                 }
                 else
                 {
-                    checkBalance(loggedInUser, "KONTON");
+                    CheckBalance(loggedInUser, "KONTON");
                     Console.WriteLine("Vilket konto vill du ta bort?");
                     while ((!int.TryParse(Console.ReadLine(), out select)) || (select < 1) || (select > loggedInUser.accounts.Count))
                     {
                         Menu.ClearLine();
                     }
-                    Console.Clear();
-                    Console.WriteLine(loggedInUser.accountNames[select - 1] + " har tagits bort.");
-                    loggedInUser.accounts.RemoveAt(select - 1);
-                    loggedInUser.accountNames.RemoveAt(select - 1);
-                    for (int i = select-1; i < loggedInUser.accounts.Count - 2; i++)
-                    {
-                        loggedInUser.accounts[i] = loggedInUser.accounts[i + 1];
-                        loggedInUser.accountNames[i] = loggedInUser.accountNames[i + 1];
-                    }
-                }
 
+                    Console.Clear();
+
+                    //This if-clause makes sure that there are no remaining funds on the account that the user wants to delete, otherwise it doesn't go through with it.
+                    if (loggedInUser.accounts[select - 1] == 0)
+                    {
+                        //If there are no remaining funds, user still has to enter their password to through with the deletion
+                        Console.WriteLine("Vänligen bekräfta borttagning av {0} med ditt lösenord: ", loggedInUser.accountNames[select - 1]);
+                        string tempPassword = Console.ReadLine();
+
+                        //If users input matches password field stored in their User-object, the account is deleted
+                        if (tempPassword == loggedInUser.password)
+                        {
+                            Console.Clear();
+                            WriteGreen(loggedInUser.accountNames[select - 1] + " har tagits bort.", 1);
+                            loggedInUser.accounts.RemoveAt(select - 1);
+                            loggedInUser.accountNames.RemoveAt(select - 1);
+
+                            //This for loop starts at the index of the deleted account, and copies the funds and name of the index above, to make sure that there are no null indexes
+                            for (int i = select - 1; i < loggedInUser.accounts.Count - 2; i++)
+                            {
+                                loggedInUser.accounts[i] = loggedInUser.accounts[i + 1];
+                                loggedInUser.accountNames[i] = loggedInUser.accountNames[i + 1];
+                            }
+                        }
+                        else
+                        {
+                            WriteRed("Fel lösenord. ", 1);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vänligen flytta kontots återstående saldo innan du tar bort det.");
+                    }               
+                }
             }
-            Console.WriteLine();
-            Console.WriteLine("Tryck Enter för att återvända.");
-            Console.ReadLine();
+            Return();
+        }
+
+        public static void PrintMenu(string tempUserName, string tempUserSurName)
+        {
+            Console.Clear();
+
+            string[] menuChoices = { ("Välkommen, "+ tempUserName + " " + tempUserSurName), "Gör menyval genom att skriva motsvarande siffra och tryck Enter.", " ", "[1] Se dina konton och saldo", "[2] Hantera konton", "[3] Överföring mellan konton", "[4] Ta ut pengar", "[5] Sätta in pengar", "[6] Logga ut" };
+            for (int i = 0; i < menuChoices.Length; i++)
+            {
+                Console.WriteLine(menuChoices[i]);
+            }
+        }
+
+        //LOGINBEEP - Plays a nice little ascending C Major chord arpeggio
+        public static void LogInBeep()
+        {
+            Console.Write("Loggar in ");
+            Console.Beep(261, 150);
+            Console.Write(". ");
+            Console.Beep(329, 150);
+            Console.Write(". ");
+            Console.Beep(392, 150);
+            Console.Write(". ");
+            Console.Beep(522, 250);
+        }
+
+        //LOGOUTBEEP - The same as above, but in reverse
+        public static void LogOutBeep()
+        {
+            Console.Clear();
+            Console.Write("Loggar ut ");
+            Console.Beep(522, 250);
+            Console.Write(". ");
+            Console.Beep(392, 150);
+            Console.Write(". ");
+            Console.Beep(329, 150);
+            Console.Write(". ");
+            Console.Beep(261, 150);
+        }
+        public static void LoginPrint()
+        {
+            Console.Clear();
+            Console.WriteLine("Vänligen fyll i användarnamn och lösenord.");
+            Console.WriteLine("Användarnamn: ");
+            Console.WriteLine("Lösenord: ");
         }
         public static void ClearLine()
         {
@@ -312,7 +363,45 @@ namespace Individuellt_Projekt___Lukas_R_SUT21
             Console.Write(new String(' ', Console.WindowWidth));
             Console.SetCursorPosition(0, Console.CursorTop - 1);
         }
+
+        //WriteGreen and WriteRed are just used to have a short command available for writing in those colors.
+        //The parameter "select" is used to decice whether I want to use the Write or WriteLine method.
+        //Since it is never used by the user, only "behind the scenes", I figured it didn´t have to be too self explanatory.
+        public static void WriteGreen(string text, int select)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            if (select == 1)
+            {
+                Console.WriteLine(text);
+            }
+            else if(select == 2)
+            {
+                Console.Write(text);
+            }           
+            Console.ResetColor();
+        }
+        public static void WriteRed(string text, int select)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            if (select == 1)
+            {
+                Console.WriteLine(text);
+            }
+            else if (select == 2)
+            {
+                Console.Write(text);
+            }
+            Console.ResetColor();
+        }
+        public static void Return()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Tryck Enter för att återvända.");
+            Console.ReadLine();
+        }
     }
+
+    //USER - a blueprint for making User-objects, which store all the useful information that the program needs. 
     public class User
     {
         public string userName;
